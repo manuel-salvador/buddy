@@ -26,3 +26,5 @@ export const web3auth = new Web3Auth({
   web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
   privateKeyProvider,
 });
+
+console.log({ web3auth });

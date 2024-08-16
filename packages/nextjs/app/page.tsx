@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { NextPage } from "next";
+import { Landing } from "~~/components/component/landing";
 import { Button } from "~~/components/ui/button";
 import { useScaffoldContract } from "~~/hooks/scaffold-eth";
 import viemRPC from "~~/lib/viemRPC";
@@ -15,23 +16,32 @@ const Home: NextPage = () => {
   });
 
   useEffect(() => {
-    const getAddress = async () => {
-      if (!web3auth.provider) return;
+    const init = async () => {
+      try {
+        await web3auth.initModal();
+        const provider = web3auth.provider;
 
-      const addresses = await viemRPC.getAccounts(web3auth.provider);
-
-      if (!addresses || addresses.length === 0) return;
-
-      setAddress(addresses[0]);
+        if (!provider) {
+          return;
+        }
+        const addresses = await viemRPC.getAccounts(provider);
+        if (addresses.length > 0) {
+          setAddress(addresses[0]);
+        }
+      } catch (error) {
+        console.error(error);
+      }
     };
 
-    getAddress();
+    init();
   }, []);
+
+  return <Landing />;
 
   const retrieveSharedData = async () => {
     if (!address) return;
     const data = await secretSharing?.read.retrieveShare([address]);
-    console.log(data);
+    console.log({ data });
   };
 
   return (

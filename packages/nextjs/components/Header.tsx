@@ -1,10 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Button, buttonVariants } from "./ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 import { IProvider } from "@web3auth/base";
 import viemRPC from "~~/lib/viemRPC";
 import { web3auth } from "~~/lib/web3auth";
+import { cn } from "~~/utils";
 
 function Header() {
   const [provider, setProvider] = useState<IProvider | null>(null);
@@ -98,54 +108,47 @@ function Header() {
 
   const loggedInView = (
     <>
-      <div className="flex-container">
-        <div>
-          <button onClick={getUserInfo} className="card">
-            Get User Info
-          </button>
-        </div>
-        <div>
-          <button onClick={getAccounts} className="card">
+      <DropdownMenu>
+        <DropdownMenuTrigger className={cn(buttonVariants({ variant: "default", size: "sm" }))}>
+          Mi cuenta
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={getUserInfo}>Get User Info</DropdownMenuItem>
+          <DropdownMenuItem onClick={getAccounts} className="card">
             Get Accounts
-          </button>
-        </div>
-        <div>
-          <button onClick={getBalance} className="card">
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={getBalance} className="card">
             Get Balance
-          </button>
-        </div>
-        <div>
-          <button onClick={signMessage} className="card">
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={signMessage} className="card">
             Sign Message
-          </button>
-        </div>
-        <div>
-          <button onClick={sendTransaction} className="card">
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={sendTransaction} className="card">
             Send Transaction
-          </button>
-        </div>
-        <div>
-          <button onClick={logout} className="card">
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={logout} className="card">
             Log Out
-          </button>
-        </div>
-      </div>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </>
   );
 
-  const unloggedInView = (
-    <button onClick={login} className="card">
-      Login
-    </button>
-  );
+  const unloggedInView = <Button onClick={login}>Login</Button>;
 
   return (
-    <header className="container">
-      <div className="grid">{loggedIn ? loggedInView : unloggedInView}</div>
+    <>
+      <header className="container flex justify-between py-4">
+        <Link href="/">
+          <h1 className="text-2xl font-bold">Budy</h1>
+        </Link>
+        <div>{loggedIn ? loggedInView : unloggedInView}</div>
+      </header>
       <div id="console" style={{ whiteSpace: "pre-line" }}>
         <p style={{ whiteSpace: "pre-line" }}></p>
       </div>
-    </header>
+    </>
   );
 }
 
