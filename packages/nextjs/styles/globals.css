@@ -1,32 +1,62 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root,
-[data-theme] {
-  background: oklch(var(--b2));
+@layer base {
+  :root {
+    /* Name: custom color palette
+       Author: Ilias Ism
+       URL: https://gradient.page */
+
+    /* CSS: .bg-gradient { background: var(--gradient) } */
+    --gradient: #1d976c;
+
+    --background: 169 44.2% 2.8%;
+    --foreground: 169 6.800000000000001% 96.75%;
+
+    --muted: 169 34% 10.5%;
+    --muted-foreground: 169 6.800000000000001% 53.5%;
+
+    --popover: 169 51.4% 4.55%;
+    --popover-foreground: 169 6.800000000000001% 96.75%;
+
+    --card: 169 51.4% 4.55%;
+    --card-foreground: 169 6.800000000000001% 96.75%;
+
+    --border: 169 34% 10.5%;
+    --input: 169 34% 10.5%;
+
+    --primary: 169 68% 35%;
+    --primary-foreground: 169 6.800000000000001% 96.75%;
+
+    --secondary: 169 34% 10.5%;
+    --secondary-foreground: 169 6.800000000000001% 96.75%;
+
+    --accent: 169 34% 10.5%;
+    --accent-foreground: 169 6.800000000000001% 96.75%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 169 6.800000000000001% 96.75%;
+
+    --ring: 169 68% 35%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
 body {
   min-height: 100vh;
-}
-
-h1,
-h2,
-h3,
-h4 {
-  margin-bottom: 0.5rem;
-  line-height: 1;
-}
-
-p {
-  margin: 1rem 0;
-}
-
-.btn {
-  @apply shadow-md;
-}
-
-.btn.btn-ghost {
-  @apply shadow-none;
 }

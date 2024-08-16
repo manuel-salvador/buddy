@@ -8,6 +8,7 @@
     ]
   },
   "scripts": {
+    "w:dev": "powershell -File ./start-dev.ps1",
     "account": "yarn workspace @se-2/hardhat account",
     "chain": "yarn workspace @se-2/hardhat chain",
     "compile": "yarn workspace @se-2/hardhat compile",

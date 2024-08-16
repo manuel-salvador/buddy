@@ -1,110 +1,152 @@
 "use client";
 
-import React, { useCallback, useRef, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Bars3Icon, BugAntIcon } from "@heroicons/react/24/outline";
-import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
-import { useOutsideClick } from "~~/hooks/scaffold-eth";
+import { IProvider } from "@web3auth/base";
+import viemRPC from "~~/lib/viemRPC";
+import { web3auth } from "~~/lib/web3auth";
 
-type HeaderMenuLink = {
-  label: string;
-  href: string;
-  icon?: React.ReactNode;
-};
+function Header() {
+  const [provider, setProvider] = useState<IProvider | null>(null);
+  const [loggedIn, setLoggedIn] = useState(false);
 
-export const menuLinks: HeaderMenuLink[] = [
-  {
-    label: "Home",
-    href: "/",
-  },
-  {
-    label: "Debug Contracts",
-    href: "/debug",
-    icon: <BugAntIcon className="h-4 w-4" />,
-  },
-];
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await web3auth.initModal();
+        setProvider(web3auth.provider);
 
-export const HeaderMenuLinks = () => {
+        if (web3auth.connected) {
+          setLoggedIn(true);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    init();
+  }, []);
+
+  const login = async () => {
+    const web3authProvider = await web3auth.connect();
+    setProvider(web3authProvider);
+    if (web3auth.connected) {
+      setLoggedIn(true);
+    }
+  };
+
+  const getUserInfo = async () => {
+    const user = await web3auth.getUserInfo();
+    uiConsole(user);
+  };
+
+  const logout = async () => {
+    await web3auth.logout();
+    setProvider(null);
+    setLoggedIn(false);
+    uiConsole("logged out");
+  };
+
+  // Check the RPC file for the implementation
+  const getAccounts = async () => {
+    if (!provider) {
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    const address = await viemRPC.getAccounts(provider);
+    uiConsole(address);
+  };
+
+  const getBalance = async () => {
+    if (!provider) {
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    const balance = await viemRPC.getBalance(provider);
+    uiConsole(balance);
+  };
+
+  const signMessage = async () => {
+    if (!provider) {
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    const signedMessage = await viemRPC.signMessage(provider);
+    uiConsole(signedMessage);
+  };
+
+  const sendTransaction = async () => {
+    if (!provider) {
+      uiConsole("provider not initialized yet");
+      return;
+    }
+    uiConsole("Sending Transaction...");
+    const transactionReceipt = await viemRPC.sendTransaction(provider);
+    uiConsole(transactionReceipt);
+  };
+
+  function uiConsole(...args: any[]): void {
+    const el = document.querySelector("#console>p");
+    if (el) {
+      el.innerHTML = JSON.stringify(args || {}, null, 2);
+      console.log(...args);
+    }
+  }
+
   const pathname = usePathname();
+  if (pathname === "/debug") return null;
 
-  return (
+  const loggedInView = (
     <>
-      {menuLinks.map(({ label, href, icon }) => {
-        const isActive = pathname === href;
-        return (
-          <li key={href}>
-            <Link
-              href={href}
-              passHref
-              className={`${
-                isActive ? "bg-secondary shadow-md" : ""
-              } hover:bg-secondary hover:shadow-md focus:!bg-secondary active:!text-neutral py-1.5 px-3 text-sm rounded-full gap-2 grid grid-flow-col`}
-            >
-              {icon}
-              <span>{label}</span>
-            </Link>
-          </li>
-        );
-      })}
+      <div className="flex-container">
+        <div>
+          <button onClick={getUserInfo} className="card">
+            Get User Info
+          </button>
+        </div>
+        <div>
+          <button onClick={getAccounts} className="card">
+            Get Accounts
+          </button>
+        </div>
+        <div>
+          <button onClick={getBalance} className="card">
+            Get Balance
+          </button>
+        </div>
+        <div>
+          <button onClick={signMessage} className="card">
+            Sign Message
+          </button>
+        </div>
+        <div>
+          <button onClick={sendTransaction} className="card">
+            Send Transaction
+          </button>
+        </div>
+        <div>
+          <button onClick={logout} className="card">
+            Log Out
+          </button>
+        </div>
+      </div>
     </>
   );
-};
 
-/**
- * Site header
- */
-export const Header = () => {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const burgerMenuRef = useRef<HTMLDivElement>(null);
-  useOutsideClick(
-    burgerMenuRef,
-    useCallback(() => setIsDrawerOpen(false), []),
+  const unloggedInView = (
+    <button onClick={login} className="card">
+      Login
+    </button>
   );
 
   return (
-    <div className="sticky lg:static top-0 navbar bg-base-100 min-h-0 flex-shrink-0 justify-between z-20 shadow-md shadow-secondary px-0 sm:px-2">
-      <div className="navbar-start w-auto lg:w-1/2">
-        <div className="lg:hidden dropdown" ref={burgerMenuRef}>
-          <label
-            tabIndex={0}
-            className={`ml-1 btn btn-ghost ${isDrawerOpen ? "hover:bg-secondary" : "hover:bg-transparent"}`}
-            onClick={() => {
-              setIsDrawerOpen(prevIsOpenState => !prevIsOpenState);
-            }}
-          >
-            <Bars3Icon className="h-1/2" />
-          </label>
-          {isDrawerOpen && (
-            <ul
-              tabIndex={0}
-              className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
-              onClick={() => {
-                setIsDrawerOpen(false);
-              }}
-            >
-              <HeaderMenuLinks />
-            </ul>
-          )}
-        </div>
-        <Link href="/" passHref className="hidden lg:flex items-center gap-2 ml-4 mr-6 shrink-0">
-          <div className="flex relative w-10 h-10">
-            <Image alt="SE2 logo" className="cursor-pointer" fill src="/logo.svg" />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-bold leading-tight">Scaffold-ETH</span>
-            <span className="text-xs">Ethereum dev stack</span>
-          </div>
-        </Link>
-        <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">
-          <HeaderMenuLinks />
-        </ul>
+    <header className="container">
+      <div className="grid">{loggedIn ? loggedInView : unloggedInView}</div>
+      <div id="console" style={{ whiteSpace: "pre-line" }}>
+        <p style={{ whiteSpace: "pre-line" }}></p>
       </div>
-      <div className="navbar-end flex-grow mr-4">
-        <RainbowKitCustomConnectButton />
-        <FaucetButton />
-      </div>
-    </div>
+    </header>
   );
-};
+}
+
+export default Header;
